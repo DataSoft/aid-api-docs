@@ -4,10 +4,8 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>API Reference</title>
+    <title>Automatic Injury Detection API Reference</title>
 
-    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
-    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
     <style>
       .highlight table td { padding: 5px; }
 .highlight table pre { margin: 0; }
@@ -88,10 +86,12 @@
   color: #90a959;
 }
     </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
       <script src="javascripts/all.js"></script>
   </head>
 
-  <body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;python&quot;]">
+  <body class="index" data-languages="[&quot;java&quot;]">
     <a href="#" id="nav-button">
       <span>
         NAV
@@ -101,9 +101,7 @@
     <div class="tocify-wrapper">
       <img src="images/logo.png" />
         <div class="lang-selector">
-              <a href="#" data-language-name="shell">shell</a>
-              <a href="#" data-language-name="ruby">ruby</a>
-              <a href="#" data-language-name="python">python</a>
+              <a href="#" data-language-name="java">java</a>
         </div>
         <div class="search">
           <input type="text" class="search" id="input-search" placeholder="Search">
@@ -112,7 +110,6 @@
       <div id="toc">
       </div>
         <ul class="toc-footer">
-            <li><a href='#'>Sign Up for a Developer Key</a></li>
             <li><a href='https://github.com/tripit/slate'>Documentation Powered by Slate</a></li>
         </ul>
     </div>
@@ -121,226 +118,274 @@
       <div class="content">
         <h1 id="introduction">Introduction</h1>
 
-<p>Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.</p>
+<p>This document describes the API for accessing the Automatic Injury Detection devices from third party Android applications.  Requires version 1.6.1 or later of the AID <a href="https://play.google.com/store/apps/details?id=datasoft.com.aid">application</a>.</p>
 
-<p>We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.</p>
+<p>There is also a bare bones example API test <a href="https://github.com/DataSoft/AIDAPItest">app</a>.</p>
 
-<p>This example API documentation page was created with <a href="https://github.com/tripit/slate">Slate</a>. Feel free to edit it and use it as a base for your own API&rsquo;s documentation.</p>
-
-<h1 id="authentication">Authentication</h1>
-
-<blockquote>
-<p>To authorize, use this code:</p>
-</blockquote>
-<pre class="highlight ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
-curl <span class="s2">"api_endpoint_here"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
+<h1 id="intents">Intents</h1>
+<pre class="highlight java"><code><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
+<span class="n">intent</span><span class="o">.</span><span class="na">setClassName</span><span class="o">(</span><span class="s">"datasoft.com.aid"</span><span class="o">,</span> <span class="s">"com.datasoft.aid.ConnectionService"</span><span class="o">);</span>
 </code></pre>
 
 <blockquote>
-<p>Make sure to replace <code class="prettyprint">meowmeowmeow</code> with your API key.</p>
+<p>Note that the package name for AID apk is <code class="prettyprint">datasoft.com.aid</code> and not <code class="prettyprint">com.datasoft.aid</code>.</p>
 </blockquote>
 
-<p>Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our <a href="http://example.com/developers">developer portal</a>.</p>
+<p>Communications to the AID ConnectionService is done by <code class="prettyprint">startService</code> with an explicit intent.  Use of implicit intents with intent filters is no longer available in Android 5.0+.  Use <code class="prettyprint">Intent.setClassName</code> with a package name of <code class="prettyprint">datasoft.com.aid</code> and a class name of <code class="prettyprint">com.datasoft.aid.ConnectionService</code> for all commands going to the AID ConnectionService.  The service returns all responses as Broadcast Intents.</p>
 
-<p>Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
+<h3 id="commands">Commands</h3>
 
-<p><code class="prettyprint">Authorization: meowmeowmeow</code></p>
+<p>Commands supported so far by the service:</p>
 
-<aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
-</aside>
+<ul>
+<li>com.datasoft.aid.action.GET_STATUS</li>
+<li>com.datasoft.aid.action.START_SCAN</li>
+<li>com.datasoft.aid.action.STOP_SCAN</li>
+</ul>
 
-<h1 id="kittens">Kittens</h1>
+<h3 id="events">Events</h3>
 
-<h2 id="get-all-kittens">Get All Kittens</h2>
-<pre class="highlight ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<p>Events reported by the service (broadcast intents):</p>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span>
+<ul>
+<li>com.datasoft.aid.event.UPDATE_STATUS</li>
+<li>com.datasoft.aid.event.DEVICE_FOUND</li>
+<li>com.datasoft.aid.event.DEVICE_CONNECTED</li>
+<li>com.datasoft.aid.event.DEVICE_DISCONNECTED</li>
+<li>com.datasoft.aid.event.INJURY</li>
+</ul>
+
+<h1 id="scanning-for-devices">Scanning for Devices</h1>
+
+<h2 id="start-scanning">Start Scanning</h2>
+
+<p>Use the com.datasoft.aid.action.START_SCAN action to scan for devices.  This will disconnect any currently connected devices while scanning.  There is currently not terribly useful because there isn&rsquo;t a way to select the AID devices using the API.</p>
+<pre class="highlight java"><code><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">"com.datasoft.aid.action.START_SCAN"</span><span class="o">);</span>
+<span class="n">intent</span><span class="o">.</span><span class="na">setClassName</span><span class="o">(</span><span class="s">"datasoft.com.aid"</span><span class="o">,</span> <span class="s">"com.datasoft.aid.ConnectionService"</span><span class="o">);</span>
+<span class="n">startService</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
 </code></pre>
-<pre class="highlight python"><code><span class="kn">import</span> <span class="nn">kittn</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</code></pre>
-<pre class="highlight shell"><code>curl <span class="s2">"http://example.com/api/kittens"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
+<h2 id="device-found">Device Found</h2>
 
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">[</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Fluffums"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calico"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></code></pre>
+<p>While scanning, devices are returned with a BroadcastIntent with action com.datasoft.aid.event.DEVICE_FOUND.  The service reports every device advertisement seen, it&rsquo;s up to the client to keep track of duplicates.  Device name and address are included in the Intent&rsquo;s extras bundle.</p>
 
-<p>This endpoint retrieves all kittens.</p>
-
-<h3 id="http-request">HTTP Request</h3>
-
-<p><code class="prettyprint">GET http://example.com/api/kittens</code></p>
-
-<h3 id="query-parameters">Query Parameters</h3>
+<h3 id="device_found-parameters">DEVICE_FOUND parameters</h3>
 
 <table><thead>
 <tr>
 <th>Parameter</th>
-<th>Default</th>
+<th>Type</th>
 <th>Description</th>
 </tr>
 </thead><tbody>
 <tr>
-<td>include_cats</td>
-<td>false</td>
-<td>If set to true, the result will also include cats.</td>
+<td>device-address</td>
+<td>String</td>
+<td>BLE address of the AID device</td>
 </tr>
 <tr>
-<td>available</td>
-<td>true</td>
-<td>If set to false, the result will include kittens that have already been adopted.</td>
+<td>device-name</td>
+<td>String</td>
+<td>Advertised name of the AID device</td>
 </tr>
 </tbody></table>
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-<h2 id="get-a-specific-kitten">Get a Specific Kitten</h2>
-<pre class="highlight ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
+<pre class="highlight java"><code><span class="n">BroadcastReceiver</span> <span class="n">deviceFoundReceiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BroadcastReceiver</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">String</span> <span class="n">address</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">"device-address"</span><span class="o">);</span>
+        <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">"device-name"</span><span class="o">);</span>
+        <span class="c1">// Do stuff..</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+<span class="n">IntentFilter</span> <span class="n">deviceFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="s">"com.datasoft.aid.event.DEVICE_FOUND"</span><span class="o">);</span>
+<span class="n">registerReceiver</span><span class="o">(</span><span class="n">deviceFoundReceiver</span><span class="o">,</span> <span class="n">deviceFilter</span><span class="o">);</span>
 </code></pre>
 
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
+<h2 id="stop-scanning">Stop Scanning</h2>
 
-<p>This endpoint retrieves a specific kitten.</p>
+<p>To stop scanning for devices, use a com.datasoft.aid.action.STOP_SCAN action.</p>
+<pre class="highlight java"><code><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">"com.datasoft.aid.action.STOP_SCAN"</span><span class="o">);</span>
+<span class="n">intent</span><span class="o">.</span><span class="na">setClassName</span><span class="o">(</span><span class="s">"datasoft.com.aid"</span><span class="o">,</span> <span class="s">"com.datasoft.aid.ConnectionService"</span><span class="o">);</span>
+<span class="n">startService</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+</code></pre>
 
-<aside class="warning">Inside HTML code blocks like this one, you can&rsquo;t use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+<h1 id="device-status">Device Status</h1>
 
-<h3 id="http-request">HTTP Request</h3>
+<p>To get the status of AID devices, send a com.datasoft.aid.action.GET_STATUS action.</p>
+<pre class="highlight java"><code><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">"com.datasoft.aid.action.GET_STATUS"</span><span class="o">);</span>
+<span class="n">intent</span><span class="o">.</span><span class="na">setClassName</span><span class="o">(</span><span class="s">"datasoft.com.aid"</span><span class="o">,</span> <span class="s">"com.datasoft.aid.ConnectionService"</span><span class="o">);</span>
+<span class="n">startService</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+</code></pre>
 
-<p><code class="prettyprint">GET http://example.com/kittens/&lt;ID&gt;</code></p>
+<h2 id="status-results">Status results</h2>
 
-<h3 id="url-parameters">URL Parameters</h3>
+<p>The service sends a com.datasoft.aid.event.UPDATE_STATUS BroadcastIntent in response.  Device status fields are in the Intent&rsquo;s extras bundle.</p>
+
+<h3 id="update_status-parameters">UPDATE_STATUS parameters</h3>
 
 <table><thead>
 <tr>
 <th>Parameter</th>
+<th>Type</th>
 <th>Description</th>
 </tr>
 </thead><tbody>
 <tr>
-<td>ID</td>
-<td>The ID of the kitten to retrieve</td>
+<td>front-device-name</td>
+<td>String</td>
+<td>Advertised name of AID device attached to front of the vest</td>
+</tr>
+<tr>
+<td>front-device-address</td>
+<td>String</td>
+<td>BLE address of front device</td>
+</tr>
+<tr>
+<td>front-device-connected</td>
+<td>boolean</td>
+<td>True if phone is currently connected to this device</td>
+</tr>
+<tr>
+<td>front-device-battery</td>
+<td>int</td>
+<td>Battery level of device in percent</td>
+</tr>
+<tr>
+<td>front-device-injury</td>
+<td>int</td>
+<td>Injury status: 1=Upper panel, 2=Lower panel, 3=Both</td>
+</tr>
+<tr>
+<td>back-device-name</td>
+<td>String</td>
+<td>Advertised name of AID device attached to back of the vest</td>
+</tr>
+<tr>
+<td>back-device-address</td>
+<td>String</td>
+<td>BLE address of back device</td>
+</tr>
+<tr>
+<td>back-device-connected</td>
+<td>boolean</td>
+<td>True if phone is currently connected to this device</td>
+</tr>
+<tr>
+<td>back-device-battery</td>
+<td>int</td>
+<td>Battery level of device in percent</td>
+</tr>
+<tr>
+<td>back-device-injury</td>
+<td>int</td>
+<td>Injury status: 1=Upper panel, 2=Lower panel, 3=Both</td>
 </tr>
 </tbody></table>
+<pre class="highlight java"><code><span class="n">BroadcastReceiver</span> <span class="n">statusReceiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BroadcastReceiver</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">String</span> <span class="n">frontName</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">"front-device-name"</span><span class="o">);</span>
+        <span class="n">String</span> <span class="n">frontAddress</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">"front-device-address"</span><span class="o">);</span>
+        <span class="kt">boolean</span> <span class="n">frontConnected</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="s">"front-device-connected"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">frontBattery</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getIntExtra</span><span class="o">(</span><span class="s">"front-device-battery"</span><span class="o">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">frontInjury</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getIntExtra</span><span class="o">(</span><span class="s">"front-device-injury"</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
 
-          <h1 id="errors">Errors</h1>
+        <span class="n">String</span> <span class="n">backName</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">"back-device-name"</span><span class="o">);</span>
+        <span class="n">String</span> <span class="n">backAddress</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">"back-device-address"</span><span class="o">);</span>
+        <span class="kt">boolean</span> <span class="n">backConnected</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="s">"back-device-connected"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">backBattery</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getIntExtra</span><span class="o">(</span><span class="s">"back-device-battery"</span><span class="o">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">backInjury</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getIntExtra</span><span class="o">(</span><span class="s">"back-device-injury"</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
 
-<aside class="notice">This error section is stored in a separate file in `includes/_errors.md`. Slate allows you to optionally separate out your docs into many files&hellip;just save them to the `includes` folder and add them to the top of your `index.md`&rsquo;s frontmatter. Files are included in the order listed.</aside>
+        <span class="c1">// Do stuff..</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+<span class="n">IntentFilter</span> <span class="n">statusFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="s">"com.datasoft.aid.event.UPDATE_STATUS"</span><span class="o">);</span>
+<span class="n">registerReceiver</span><span class="o">(</span><span class="n">statusReceiver</span><span class="o">,</span> <span class="n">statusFilter</span><span class="o">);</span>
+</code></pre>
 
-<p>The Kittn API uses the following error codes:</p>
+<h1 id="other-device-events">Other Device Events</h1>
+
+<p>These events are broadcast based on device events and not as a response to an action.</p>
+
+<h2 id="device-disconnected">Device Disconnected</h2>
+
+<p>The com.datasoft.aid.event.DEVICE_DISCONNECTED event notifies the client that the AID devices are no longer connected to the service.  For example, when the phone goes out of range of the devices.  No extra data is included in this intent.</p>
+<pre class="highlight java"><code><span class="n">BroadcastReceiver</span> <span class="n">disconnectedReceiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BroadcastReceiver</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">"AID Devices have been disconnected"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+<span class="n">IntentFilter</span> <span class="n">disconnectedFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="s">"com.datasoft.aid.event.DEVICE_DISCONNECTED"</span><span class="o">);</span>
+<span class="n">registerReceiver</span><span class="o">(</span><span class="n">disconnectedReceiver</span><span class="o">,</span> <span class="n">disconnectedFilter</span><span class="o">);</span>
+</code></pre>
+
+<h2 id="device-connected">Device Connected</h2>
+
+<p>The com.datasoft.aid.event.DEVICE_CONNECTED event notifies the client that the AID devices are both connected to the service.  No extra data is included in this intent.</p>
+<pre class="highlight java"><code><span class="n">BroadcastReceiver</span> <span class="n">connectedReceiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BroadcastReceiver</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">"AID Devices have been connected"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+<span class="n">IntentFilter</span> <span class="n">connectedFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="s">"com.datasoft.aid.event.DEVICE_CONNECTED"</span><span class="o">);</span>
+<span class="n">registerReceiver</span><span class="o">(</span><span class="n">connectedReceiver</span><span class="o">,</span> <span class="n">connectedFilter</span><span class="o">);</span>
+</code></pre>
+
+<h2 id="injury-detected">Injury Detected</h2>
+
+<p>The com.datasoft.aid.event.INJURY event notifies the client that one of the AID devices has detected a piercing event.  The injury location is included in the intent&rsquo;s extras bundle.</p>
+
+<h3 id="injury-parameters">INJURY parameters</h3>
 
 <table><thead>
 <tr>
-<th>Error Code</th>
-<th>Meaning</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead><tbody>
 <tr>
-<td>400</td>
-<td>Bad Request &ndash; Your request sucks</td>
+<td>front-upper</td>
+<td>boolean</td>
+<td>True if the upper part of the front panel has been pierced.</td>
 </tr>
 <tr>
-<td>401</td>
-<td>Unauthorized &ndash; Your API key is wrong</td>
+<td>front-lower</td>
+<td>boolean</td>
+<td>True if the lower part of the front panel has been pierced.</td>
 </tr>
 <tr>
-<td>403</td>
-<td>Forbidden &ndash; The kitten requested is hidden for administrators only</td>
+<td>back-upper</td>
+<td>boolean</td>
+<td>True if the upper part of the back panel has been pierced.</td>
 </tr>
 <tr>
-<td>404</td>
-<td>Not Found &ndash; The specified kitten could not be found</td>
-</tr>
-<tr>
-<td>405</td>
-<td>Method Not Allowed &ndash; You tried to access a kitten with an invalid method</td>
-</tr>
-<tr>
-<td>406</td>
-<td>Not Acceptable &ndash; You requested a format that isn&rsquo;t json</td>
-</tr>
-<tr>
-<td>410</td>
-<td>Gone &ndash; The kitten requested has been removed from our servers</td>
-</tr>
-<tr>
-<td>418</td>
-<td>I&rsquo;m a teapot</td>
-</tr>
-<tr>
-<td>429</td>
-<td>Too Many Requests &ndash; You&rsquo;re requesting too many kittens! Slow down!</td>
-</tr>
-<tr>
-<td>500</td>
-<td>Internal Server Error &ndash; We had a problem with our server. Try again later.</td>
-</tr>
-<tr>
-<td>503</td>
-<td>Service Unavailable &ndash; We&rsquo;re temporarially offline for maintanance. Please try again later.</td>
+<td>back-lower</td>
+<td>boolean</td>
+<td>True if the lower part of the back panel has been pierced.</td>
 </tr>
 </tbody></table>
+<pre class="highlight java"><code><span class="n">BroadcastReceiver</span> <span class="n">injuryReceiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BroadcastReceiver</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">boolean</span> <span class="n">frontUpper</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="s">"front-upper"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="kt">boolean</span> <span class="n">frontLower</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="s">"front-lower"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="kt">boolean</span> <span class="n">backUpper</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="s">"back-upper"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="kt">boolean</span> <span class="n">backLower</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getBooleanExtra</span><span class="o">(</span><span class="s">"back-lower"</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+
+        <span class="c1">// Do stuff</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+<span class="n">IntentFilter</span> <span class="n">injuryFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="s">"com.datasoft.aid.event.INJURY"</span><span class="o">);</span>
+<span class="n">registerReceiver</span><span class="o">(</span><span class="n">injuryReceiver</span><span class="o">,</span> <span class="n">injuryFilter</span><span class="o">);</span>
+</code></pre>
 
       </div>
       <div class="dark-box">
           <div class="lang-selector">
-                <a href="#" data-language-name="shell">shell</a>
-                <a href="#" data-language-name="ruby">ruby</a>
-                <a href="#" data-language-name="python">python</a>
+                <a href="#" data-language-name="java">java</a>
           </div>
       </div>
     </div>
